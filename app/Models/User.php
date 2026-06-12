@@ -12,6 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
+    // added the HasRoles trait to the User model to enable role-based access control in the system
     use HasFactory, Notifiable, HasRoles;
 
     /**
