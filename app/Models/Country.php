@@ -15,4 +15,11 @@ class Country extends Model
     protected $fillable = [
         'name',
     ];
+
+    //defining relationship with the Camp model
+    // This relationship allows a country to have many camps
+    public function camps()
+    {
+        return $this->hasMany(Camp::class);
+    }
 }
