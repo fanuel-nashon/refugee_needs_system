@@ -10,5 +10,9 @@ class Country extends Model
     /** @use HasFactory<\Database\Factories\CountryFactory> */
     use HasFactory;
 
+    protected $table = 'countries';
     
+    protected $fillable = [
+        'name',
+    ];
 }
