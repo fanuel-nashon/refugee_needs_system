@@ -48,6 +48,7 @@
             const countriesUrl="{{ route('register.countries') }}";
             const storeUrl="{{ route('register.store') }}";
             const dashboardUrl="{{ route('dashboard') }}";
+            const otpUrl="{{ route('registration-otp') }}";
         </script>
         <script src="{{ asset('assets/js/register.js') }}"></script>       
     @endpush

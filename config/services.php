@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // setting up the sms credentials from .env
+    'sms' => [
+        'url' => env('BASE_URL'),
+        'token' => env('SMS_API_TOKEN'),
+        'test_url' => env('BASE_URL') . '/api/sms/v2/test/text/single',
+        'real_url' => env('BASE_URL') . '/api/sms/v2/text/single',
+    ],
 ];
