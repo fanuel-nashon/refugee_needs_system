@@ -14,6 +14,7 @@ class Refugee extends Model
 
     protected $fillable=[
         'name',
+        'phone_no',
         'country_of_origin',
         'date_of_birth',
         'host_country'

@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Refugee Needs System')</title>
-    {{-- importing the stylesheet that contains Tailwind CSS --}}
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @vite('resources/css/app.css')
 </head>
 <body>
     @yield('content')
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @stack('script')
 </body>
 </html>

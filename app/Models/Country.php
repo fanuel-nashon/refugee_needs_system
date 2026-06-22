@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Country extends Model
 {
@@ -22,4 +23,21 @@ class Country extends Model
     {
         return $this->hasMany(Camp::class);
     }
+
+    //Auto-invalidate of cache keys when countries change
+    protected static function booted()
+    {
+        static::created(function () {
+            cache()->forget('countries_list');
+        });
+
+        static::updated(function () {
+            cache()->forget('countries_list');
+        });
+
+        static::deleted(function () {
+            cache()->forget('countries_list');
+        });
+    }
+
 }
