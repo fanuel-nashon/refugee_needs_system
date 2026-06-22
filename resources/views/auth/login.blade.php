@@ -5,6 +5,7 @@
 @section('content')
   
     <form id="loginForm">
+        @csrf
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
         <br><br>
@@ -14,6 +15,8 @@
         <button type="submit">Login</button>
 
         <p id="responseTxt" style="display: none;"></p>
+
+        <p>Do not have an account?, Click <a href="{{ route('register.create') }}">here</a> to register
    
     </form>
 
@@ -24,7 +27,7 @@
             let $msg = $('#responseTxt');
 
             $.ajax({
-                url: '/login',
+                url: "{{ route('login') }}",
                 method: 'POST',
                 data: {
                     email: $('#email').val(),
