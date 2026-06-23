@@ -7,16 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Refugee extends Model
 {
-    /** @use HasFactory<\Database\Factories\RefugeeFactory> */
     use HasFactory;
 
-    protected $table='refugees';
+    protected $table = 'refugees';
 
-    protected $fillable=[
+    protected $fillable = [
         'name',
         'phone_no',
-        'country_of_origin',
         'date_of_birth',
-        'host_country'
+        'country_of_origin',
+        'host_country',
+        'password',
+    ];
+
+    protected $hidden = ['password'];
+
+    protected $casts = [
+        'password' => 'hashed',
     ];
 }
