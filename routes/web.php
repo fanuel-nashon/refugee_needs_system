@@ -17,3 +17,6 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 
 Route::view('/dashboard','pages.dashboard')->name('dashboard');
+
+Route::post('/register/verify-otp', [RegistrationController::class, 'verifyOtp'])->name('registration-otp');
+Route::post('/register/resend-otp', [RegistrationController::class, 'resendOtp'])->name('register.resend-otp');

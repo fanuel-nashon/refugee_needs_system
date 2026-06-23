@@ -41,6 +41,17 @@
         <span class="error-message" id="error-general"></span>
     </form>
 
+    <div id="otpSection" style="display:none;">
+        <p>A 6-digit verification code has been sent to your phone.</p>
+        <label for="otp">Verification Code</label>
+        <input type="text" id="otp" name="otp" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" pattern="\d{6}">
+        <span class="error-message" id="error-otp"></span>
+        <br><br>
+        <button type="button" id="verifyOtpBtn">Verify</button>
+        <button type="button" id="resendOtpBtn" disabled>Resend Code</button>
+        <span id="resendCountdown"></span>
+    </div>
+
     @push('script')
         {{-- echo the routes and csrf token to send them to js as variables --}}
         <script>
@@ -49,6 +60,7 @@
             const storeUrl="{{ route('register.store') }}";
             const dashboardUrl="{{ route('dashboard') }}";
             const otpUrl="{{ route('registration-otp') }}";
+            const resendOtpUrl="{{ route('register.resend-otp') }}";
         </script>
         <script src="{{ asset('assets/js/register.js') }}"></script>       
     @endpush
