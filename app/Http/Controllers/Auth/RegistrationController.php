@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use App\Services\OtpService;
 
 class RegistrationController extends Controller
@@ -42,8 +43,10 @@ class RegistrationController extends Controller
                     'date',
                     'before_or_equal:' . now()->subYears(18)->toDateString(),
                 ],
-                'country_of_origin' => 'required|string|exists:countries,name',
-                'host_country'      => 'required|string|exists:countries,name|different:country_of_origin',
+                'country_of_origin'   => 'required|string|exists:countries,name',
+                'host_country'        => 'required|string|exists:countries,name|different:country_of_origin',
+                'password'            => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+                'password_confirmation' => 'required',
             ]);
 
             if ($validator->fails()) {
@@ -59,7 +62,14 @@ class RegistrationController extends Controller
                 now()->addMinutes(10)
             );
 
-            return response()->json(['status' => 'otp_sent']);
+            $response = ['status' => 'otp_sent'];
+
+            $bypassOtp = $otpService->getBypassOtp($request->phone_no);
+            if ($bypassOtp !== null) {
+                $response['dev_otp'] = $bypassOtp;
+            }
+
+            return response()->json($response);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -86,8 +96,14 @@ class RegistrationController extends Controller
             return response()->json(['status' => 'expired'], 422);
         }
 
-        Refugee::create($data);
+        $refugee = Refugee::create($data);
         Cache::forget("pending_registration_{$request->phone_no}");
+
+        session([
+            'refugee_id'    => $refugee->id,
+            'refugee_phone' => $refugee->phone_no,
+            'refugee_name'  => $refugee->name,
+        ]);
 
         return response()->json(['status' => 'registered'], 201);
     }

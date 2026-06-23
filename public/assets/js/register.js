@@ -27,17 +27,13 @@ $.ajax({
 // prevent selecting identical countries in real time
 $('#selectOrigin, #selectHost').on('change', function() {
     const originVal = $('#selectOrigin').val();
-    const hostVal = $('#selectHost').val();
+    const hostVal   = $('#selectHost').val();
 
     $('#selectHost option').prop('disabled', false);
     $('#selectOrigin option').prop('disabled', false);
 
-    if (originVal) {
-        $('#selectHost option[value="' + originVal + '"]').prop('disabled', true);
-    }
-    if (hostVal) {
-        $('#selectOrigin option[value="' + hostVal + '"]').prop('disabled', true);
-    }
+    if (originVal) $('#selectHost option[value="' + originVal + '"]').prop('disabled', true);
+    if (hostVal)   $('#selectOrigin option[value="' + hostVal + '"]').prop('disabled', true);
 });
 
 let pendingPhone = '';
@@ -52,9 +48,8 @@ $('#registerForm').on('submit', function(e) {
         return;
     }
 
-    const $submitBtn = $(this).find('button[type="submit"]');
-    const originalBtnText = $submitBtn.text();
-    $submitBtn.prop('disabled', true).text('Registering...');
+    const $btn = $(this).find('button[type="submit"]');
+    $btn.prop('disabled', true).text('Sending code...');
 
     $.ajax({
         url: storeUrl,
@@ -65,7 +60,9 @@ $('#registerForm').on('submit', function(e) {
             phone_no: $('#phone_no').val(),
             date_of_birth: $('#date_of_birth').val(),
             country_of_origin: $('#selectOrigin').val(),
-            host_country: $('#selectHost').val()
+            host_country: $('#selectHost').val(),
+            password: $('#password').val(),
+            password_confirmation: $('#password_confirmation').val(),
         },
         success: function(response) {
             if (response.status === 'otp_sent') {
@@ -73,10 +70,16 @@ $('#registerForm').on('submit', function(e) {
                 $('#registerForm').hide();
                 $('#otpSection').show();
                 startResendCountdown();
+
+                // dev bypass: pre-fill OTP and show notice
+                if (response.dev_otp) {
+                    $('#otp').val(response.dev_otp);
+                    $('#dev-otp-notice').show().text('Dev mode: OTP pre-filled (' + response.dev_otp + ')');
+                }
             }
         },
         error: function(xhr) {
-            $submitBtn.prop('disabled', false).text(originalBtnText);
+            $btn.prop('disabled', false).text('Register');
             $('.error-message').text('');
             if (xhr.status === 422) {
                 let errors = xhr.responseJSON;
@@ -108,11 +111,7 @@ $('#verifyOtpBtn').on('click', function() {
     $.ajax({
         url: otpUrl,
         method: 'POST',
-        data: {
-            _token: csrfToken,
-            phone_no: pendingPhone,
-            otp: otp
-        },
+        data: { _token: csrfToken, phone_no: pendingPhone, otp: otp },
         success: function(response) {
             if (response.status === 'registered') {
                 window.location.href = dashboardUrl;
@@ -125,7 +124,7 @@ $('#verifyOtpBtn').on('click', function() {
                 $('#error-otp').text('Invalid code. Please check and try again.');
             } else if (status === 'expired') {
                 $('#error-otp').text('Session expired. Please register again.');
-                setTimeout(function() { window.location.reload(); }, 3000);
+                setTimeout(() => window.location.reload(), 3000);
             } else {
                 $('#error-otp').text('Verification failed. Please try again.');
             }
@@ -133,7 +132,7 @@ $('#verifyOtpBtn').on('click', function() {
     });
 });
 
-// resend OTP with 60-second cooldown
+// resend with 60-second cooldown
 let resendTimer = null;
 
 function startResendCountdown() {
@@ -142,7 +141,7 @@ function startResendCountdown() {
     clearInterval(resendTimer);
     resendTimer = setInterval(function() {
         seconds--;
-        $('#resendCountdown').text('Resend available in ' + seconds + 's');
+        $('#resendCountdown').text('Resend in ' + seconds + 's');
         if (seconds <= 0) {
             clearInterval(resendTimer);
             $('#resendOtpBtn').prop('disabled', false);
@@ -158,21 +157,22 @@ $('#resendOtpBtn').on('click', function() {
     $.ajax({
         url: resendOtpUrl,
         method: 'POST',
-        data: {
-            _token: csrfToken,
-            phone_no: pendingPhone
-        },
-        success: function() {
+        data: { _token: csrfToken, phone_no: pendingPhone },
+        success: function(response) {
             $btn.text('Resend Code');
             $('#error-otp').text('');
             startResendCountdown();
+            if (response.dev_otp) {
+                $('#otp').val(response.dev_otp);
+                $('#dev-otp-notice').show().text('Dev mode: new OTP pre-filled (' + response.dev_otp + ')');
+            }
         },
         error: function(xhr) {
             $btn.prop('disabled', false).text('Resend Code');
             if (xhr.status === 429) {
-                $('#error-otp').text('Too many resend attempts. Please wait before trying again.');
+                $('#error-otp').text('Too many resend attempts. Please wait.');
             } else {
-                $('#error-otp').text('Failed to resend code. Please try again.');
+                $('#error-otp').text('Failed to resend. Please try again.');
             }
         }
     });
