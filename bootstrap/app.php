@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'refugee.auth' => \App\Http\Middleware\EnsureRefugeeAuthenticated::class,
+            'role'         => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'   => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
