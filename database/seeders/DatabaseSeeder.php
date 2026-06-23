@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -25,6 +24,7 @@ class DatabaseSeeder extends Seeder
         //call the seeders to seed the countries table
         $this->call([
             CountrySeeder::class,
+            RolesAndPermissionsSeeder::class,
         ]);
     }
 }
