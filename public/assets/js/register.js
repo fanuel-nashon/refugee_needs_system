@@ -1,9 +1,23 @@
+function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(function(el) {
+        el.textContent = '';
+        el.classList.add('hidden');
+    });
+}
+
 function validatePhone() {
     const regex = /^0[67]\d{8}$/;
     if (!regex.test($(this).val())) {
-        this.setCustomValidity("Phone must start with 06 or 07 and be 10 digits");
+        this.setCustomValidity('Phone must start with 06 or 07 and be 10 digits');
     } else {
-        this.setCustomValidity("");
+        this.setCustomValidity('');
     }
 }
 $('#phone_no').on('input change', validatePhone);
@@ -14,17 +28,17 @@ $.ajax({
     method: 'GET',
     success: function(data) {
         data.forEach(function(country) {
-            let option = `<option value="${country}">${country}</option>`;
+            const option = '<option value="' + country + '">' + country + '</option>';
             $('#selectOrigin').append(option);
             $('#selectHost').append(option);
         });
     },
     error: function() {
-        $('#error-general').text('Failed to load countries. Please refresh the page.');
+        showError('error-general', 'Failed to load countries. Please refresh the page.');
     }
 });
 
-// prevent selecting identical countries in real time
+// prevent selecting identical countries
 $('#selectOrigin, #selectHost').on('change', function() {
     const originVal = $('#selectOrigin').val();
     const hostVal   = $('#selectHost').val();
@@ -36,143 +50,49 @@ $('#selectOrigin, #selectHost').on('change', function() {
     if (hostVal)   $('#selectOrigin option[value="' + hostVal + '"]').prop('disabled', true);
 });
 
-let pendingPhone = '';
-
-// step 1: submit registration form
+// submit registration form
 $('#registerForm').on('submit', function(e) {
     e.preventDefault();
-    $('.error-message').text('');
+    clearErrors();
 
-    if ($('#selectOrigin').val() === $('#selectHost').val()) {
-        $('#error-host_country').text('Origin and host country cannot be the same');
+    if ($('#selectOrigin').val() === $('#selectHost').val() && $('#selectOrigin').val() !== '') {
+        showError('error-host_country', 'Origin and host country cannot be the same.');
         return;
     }
 
     const $btn = $(this).find('button[type="submit"]');
-    $btn.prop('disabled', true).text('Sending code...');
+    $btn.prop('disabled', true).text('Creating account...');
 
     $.ajax({
         url: storeUrl,
         method: 'POST',
         data: {
-            _token: csrfToken,
-            name: $('#name').val(),
-            phone_no: $('#phone_no').val(),
-            date_of_birth: $('#date_of_birth').val(),
-            country_of_origin: $('#selectOrigin').val(),
-            host_country: $('#selectHost').val(),
-            password: $('#password').val(),
+            _token:               csrfToken,
+            name:                 $('#name').val(),
+            phone_no:             $('#phone_no').val(),
+            date_of_birth:        $('#date_of_birth').val(),
+            country_of_origin:    $('#selectOrigin').val(),
+            host_country:         $('#selectHost').val(),
+            password:             $('#password').val(),
             password_confirmation: $('#password_confirmation').val(),
         },
-        success: function(response) {
-            if (response.status === 'otp_sent') {
-                pendingPhone = $('#phone_no').val();
-                $('#registerForm').hide();
-                $('#otpSection').show();
-                startResendCountdown();
-
-                // dev bypass: pre-fill OTP and show notice
-                if (response.dev_otp) {
-                    $('#otp').val(response.dev_otp);
-                    $('#dev-otp-notice').show().text('Dev mode: OTP pre-filled (' + response.dev_otp + ')');
-                }
-            }
-        },
-        error: function(xhr) {
-            $btn.prop('disabled', false).text('Register');
-            $('.error-message').text('');
-            if (xhr.status === 422) {
-                let errors = xhr.responseJSON;
-                for (const field in errors) {
-                    $('#error-' + field).text(errors[field][0]);
-                }
-            } else if (xhr.status === 500) {
-                $('#error-general').text(xhr.responseJSON.message);
-            } else {
-                $('#error-general').text('An unexpected error occurred');
-            }
-        }
-    });
-});
-
-// step 2: verify OTP
-$('#verifyOtpBtn').on('click', function() {
-    $('.error-message').text('');
-    const otp = $('#otp').val().trim();
-
-    if (!otp || otp.length !== 6) {
-        $('#error-otp').text('Please enter the 6-digit code.');
-        return;
-    }
-
-    const $btn = $(this);
-    $btn.prop('disabled', true).text('Verifying...');
-
-    $.ajax({
-        url: otpUrl,
-        method: 'POST',
-        data: { _token: csrfToken, phone_no: pendingPhone, otp: otp },
         success: function(response) {
             if (response.status === 'registered') {
                 window.location.href = dashboardUrl;
             }
         },
         error: function(xhr) {
-            $btn.prop('disabled', false).text('Verify');
-            const status = xhr.responseJSON && xhr.responseJSON.status;
-            if (status === 'invalid_otp') {
-                $('#error-otp').text('Invalid code. Please check and try again.');
-            } else if (status === 'expired') {
-                $('#error-otp').text('Session expired. Please register again.');
-                setTimeout(() => window.location.reload(), 3000);
+            $btn.prop('disabled', false).text('Register');
+            clearErrors();
+
+            if (xhr.status === 422) {
+                const errors = xhr.responseJSON || {};
+                Object.entries(errors).forEach(function([field, messages]) {
+                    showError('error-' + field, messages[0]);
+                });
             } else {
-                $('#error-otp').text('Verification failed. Please try again.');
-            }
-        }
-    });
-});
-
-// resend with 60-second cooldown
-let resendTimer = null;
-
-function startResendCountdown() {
-    let seconds = 60;
-    $('#resendOtpBtn').prop('disabled', true);
-    clearInterval(resendTimer);
-    resendTimer = setInterval(function() {
-        seconds--;
-        $('#resendCountdown').text('Resend in ' + seconds + 's');
-        if (seconds <= 0) {
-            clearInterval(resendTimer);
-            $('#resendOtpBtn').prop('disabled', false);
-            $('#resendCountdown').text('');
-        }
-    }, 1000);
-}
-
-$('#resendOtpBtn').on('click', function() {
-    const $btn = $(this);
-    $btn.prop('disabled', true).text('Sending...');
-
-    $.ajax({
-        url: resendOtpUrl,
-        method: 'POST',
-        data: { _token: csrfToken, phone_no: pendingPhone },
-        success: function(response) {
-            $btn.text('Resend Code');
-            $('#error-otp').text('');
-            startResendCountdown();
-            if (response.dev_otp) {
-                $('#otp').val(response.dev_otp);
-                $('#dev-otp-notice').show().text('Dev mode: new OTP pre-filled (' + response.dev_otp + ')');
-            }
-        },
-        error: function(xhr) {
-            $btn.prop('disabled', false).text('Resend Code');
-            if (xhr.status === 429) {
-                $('#error-otp').text('Too many resend attempts. Please wait.');
-            } else {
-                $('#error-otp').text('Failed to resend. Please try again.');
+                const msg = xhr.responseJSON && xhr.responseJSON.message;
+                showError('error-general', msg || 'An unexpected error occurred. Please try again.');
             }
         }
     });

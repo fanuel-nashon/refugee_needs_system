@@ -148,7 +148,7 @@
 
         <p class="text-center text-sm text-slate-500 mt-6">
             Already have an account?
-            <a href="{{ route('login.view') }}" class="text-emerald-600 hover:text-emerald-700 font-medium">Login here</a>
+            <a href="{{ route('login') }}" class="text-emerald-600 hover:text-emerald-700 font-medium">Login here</a>
         </p>
 
     </div>
@@ -159,7 +159,7 @@
     const csrfToken    = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const countriesUrl = "{{ route('register.countries') }}";
     const storeUrl     = "{{ route('register.store') }}";
-    const dashboardUrl = "{{ route('dashboard') }}";
+    const dashboardUrl = "{{ route('refugee.home') }}";
     const otpUrl       = "{{ route('registration-otp') }}";
     const resendOtpUrl = "{{ route('register.resend-otp') }}";
 

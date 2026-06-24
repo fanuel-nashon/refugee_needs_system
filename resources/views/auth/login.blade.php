@@ -69,8 +69,8 @@
 @push('script')
 <script>
     const csrfToken  = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const loginUrl   = "{{ route('login') }}";
-    const dashUrl    = "{{ route('dashboard') }}";
+    const loginUrl   = "{{ route('login.post') }}";
+    const dashUrl    = "{{ route('refugee.home') }}";
 
     function showError(id, msg) {
         const el = document.getElementById(id);

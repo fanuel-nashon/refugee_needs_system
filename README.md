@@ -1,59 +1,71 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Refugee Needs Assessment System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web-based platform for recording, prioritising, and tracking the humanitarian needs of refugees in a camp setting. Built as a Final Year Project for the BSc in Information and Communication Technology (ICTB) programme at Mzumbe University.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Refugee self-registration** — phone number + OTP verification + strong password
+- **Refugee login** — phone number and password (no email required)
+- **Needs assessment** — staff record needs across five categories with a weighted priority score
+- **Priority scoring** — formula-driven score combining urgency, vulnerability indicators, and category weight (max 292.50)
+- **Role-based access control** — Admin and Aid Worker roles via Spatie Laravel Permission
+- **Reports and analytics** — needs breakdown by category, urgency, and top priority cases
+- **Audit trail** — every create / update / delete / login / logout is logged with actor and IP
+- **Admin user management** — admins can create and remove staff accounts
+- **Staff authentication** — separate email + password login for admin and aid worker accounts
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech Stack
 
-## Learning Laravel
+| Layer | Technology |
+|---|---|
+| Framework | Laravel 12 (PHP 8.2) |
+| Frontend | Blade + Tailwind CSS v4 (via `@tailwindcss/vite`) |
+| Build tool | Vite 7 |
+| Database | PostgreSQL |
+| RBAC | Spatie Laravel Permission v6 |
+| JS libraries | jQuery 4, Axios |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Quick Start
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git clone <repo-url> refugee_needs_system
+cd refugee_needs_system
 
-## Laravel Sponsors
+composer install
+cp .env.example .env
+php artisan key:generate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# configure .env (DB credentials, SMS_BYPASS=true for dev)
 
-### Premium Partners
+php artisan migrate
+php artisan db:seed
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+npm install
+composer dev       # starts PHP server + Vite + queue listener concurrently
+```
 
-## Contributing
+Default admin account created by the seeder:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Field | Value |
+|---|---|
+| Email | `admin@refugeesystem.local` |
+| Password | `Admin@1234` |
 
-## Code of Conduct
+Full setup instructions: see [DEVELOPMENT.md](DEVELOPMENT.md)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Roles
 
-## Security Vulnerabilities
+| Role | Access |
+|---|---|
+| `admin` | Dashboard, Needs, Reports, Audit Logs, User Management |
+| `aid_worker` | Dashboard, Needs, Reports |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Needs Categories
+
+`food` · `shelter` · `healthcare` · `education` · `protection`
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT

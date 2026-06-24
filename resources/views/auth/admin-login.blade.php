@@ -57,7 +57,7 @@
 
         <p class="text-center text-sm text-slate-500 mt-6">
             Are you a refugee?
-            <a href="{{ route('login.view') }}" class="text-indigo-600 hover:text-indigo-700 font-medium">Login with phone number</a>
+            <a href="{{ route('login') }}" class="text-indigo-600 hover:text-indigo-700 font-medium">Login with phone number</a>
         </p>
 
     </div>

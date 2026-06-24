@@ -11,7 +11,7 @@ class EnsureRefugeeAuthenticated
     public function handle(Request $request, Closure $next): Response
     {
         if (!session()->has('refugee_id')) {
-            return redirect()->route('login.view')
+            return redirect()->route('login')
                 ->with('error', 'Please log in to continue.');
         }
 

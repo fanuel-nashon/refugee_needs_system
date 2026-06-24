@@ -9,6 +9,15 @@
     <p class="text-slate-500 text-sm mt-1">Create and manage staff accounts (admins and aid workers)</p>
 </div>
 
+@if(session('success'))
+<div class="mb-5 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg px-4 py-3 text-sm">
+    <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    </svg>
+    {{ session('success') }}
+</div>
+@endif
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
     {{-- User list --}}
@@ -48,18 +57,24 @@
                     </td>
                     <td class="px-4 py-3 text-sm text-slate-500">{{ $user->created_at->format('d M Y') }}</td>
                     <td class="px-4 py-3 text-right">
-                        @if($user->id !== Auth::id())
-                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                              onsubmit="return confirm('Remove {{ addslashes($user->name) }}? This cannot be undone.');">
-                            @csrf @method('DELETE')
-                            <button type="submit"
-                                class="text-red-500 hover:text-red-700 text-xs font-medium hover:underline transition-colors">
-                                Remove
-                            </button>
-                        </form>
-                        @else
-                        <span class="text-xs text-slate-400 italic">You</span>
-                        @endif
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="{{ route('admin.users.edit', $user) }}"
+                               class="text-indigo-600 hover:text-indigo-800 text-xs font-medium hover:underline transition-colors">
+                                Edit
+                            </a>
+                            @if($user->id !== Auth::id())
+                            <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
+                                  onsubmit="return confirm('Remove {{ addslashes($user->name) }}? This cannot be undone.');">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                    class="text-red-500 hover:text-red-700 text-xs font-medium hover:underline transition-colors">
+                                    Remove
+                                </button>
+                            </form>
+                            @else
+                            <span class="text-xs text-slate-400 italic">You</span>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty

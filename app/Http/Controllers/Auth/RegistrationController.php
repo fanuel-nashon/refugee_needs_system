@@ -32,51 +32,35 @@ class RegistrationController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request, OtpService $otpService)
+    public function store(Request $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'name'             => 'required|string',
-                'phone_no'         => 'required|string|unique:refugees,phone_no',
-                'date_of_birth'    => [
-                    'required',
-                    'date',
-                    'before_or_equal:' . now()->subYears(18)->toDateString(),
-                ],
-                'country_of_origin'   => 'required|string|exists:countries,name',
-                'host_country'        => 'required|string|exists:countries,name|different:country_of_origin',
-                'password'            => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
-                'password_confirmation' => 'required',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'name'                  => 'required|string',
+            'phone_no'              => 'required|string|unique:refugees,phone_no',
+            'date_of_birth'         => [
+                'required',
+                'date',
+                'before_or_equal:' . now()->subYears(18)->toDateString(),
+            ],
+            'country_of_origin'     => 'required|string|exists:countries,name',
+            'host_country'          => 'required|string|exists:countries,name|different:country_of_origin',
+            'password'              => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'password_confirmation' => 'required',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 422);
-            }
-
-            $otp = $otpService->generate($request->phone_no);
-            $otpService->send($request->phone_no, $otp);
-
-            Cache::put(
-                "pending_registration_{$request->phone_no}",
-                $validator->validated(),
-                now()->addMinutes(10)
-            );
-
-            $response = ['status' => 'otp_sent'];
-
-            $bypassOtp = $otpService->getBypassOtp($request->phone_no);
-            if ($bypassOtp !== null) {
-                $response['dev_otp'] = $bypassOtp;
-            }
-
-            return response()->json($response);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => $e->getMessage() ?: 'Registration failed. Please try again.',
-            ], 500);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
         }
+
+        $refugee = Refugee::create($validator->validated());
+
+        session([
+            'refugee_id'    => $refugee->id,
+            'refugee_phone' => $refugee->phone_no,
+            'refugee_name'  => $refugee->name,
+        ]);
+
+        return response()->json(['status' => 'registered'], 201);
     }
 
     public function verifyOtp(Request $request, OtpService $otpService)

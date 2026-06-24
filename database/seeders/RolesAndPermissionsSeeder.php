@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class RolesAndPermissionsSeeder extends Seeder
@@ -21,7 +20,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'admin@refugeesystem.local'],
             [
                 'name'     => 'System Administrator',
-                'password' => Hash::make('Admin@1234'),
+                'password' => 'Admin@1234',
             ]
         );
         $admin->assignRole('admin');
