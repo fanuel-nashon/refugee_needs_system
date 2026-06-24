@@ -21,10 +21,10 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        //call the seeders to seed the countries table
         $this->call([
             CountrySeeder::class,
-            RolesAndPermissionsSeeder::class,
+            RolesAndPermissionsSeeder::class, // creates roles first — users depend on them
+            InitialUsersSeeder::class,
         ]);
     }
 }
