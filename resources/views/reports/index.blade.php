@@ -4,9 +4,18 @@
 
 @section('content')
 
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-slate-800">Reports & Analytics</h1>
-    <p class="text-slate-500 text-sm mt-1">Statistical overview of refugee needs assessment</p>
+<div class="mb-8 flex items-start justify-between gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800">Reports & Analytics</h1>
+        <p class="text-slate-500 text-sm mt-1">Statistical overview of refugee needs assessment</p>
+    </div>
+    <a href="{{ route('reports.pdf') }}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium shadow-sm transition-colors whitespace-nowrap">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v4m0 0l-3-3m3 3l3-3M12 4v8" />
+        </svg>
+        Download PDF
+    </a>
 </div>
 
 {{-- Top stats --}}

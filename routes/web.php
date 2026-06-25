@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     // Reports — accessible by admin and aid_worker
     Route::middleware(['role:admin|aid_worker'])->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
     });
 
     // Admin-only routes

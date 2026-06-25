@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Need;
 use App\Models\Refugee;
-use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
-    public function index()
+    private function reportData(): array
     {
         $needsByCategory = Need::selectRaw('category, count(*) as total, avg(priority_score) as avg_score')
             ->groupBy('category')
@@ -35,11 +35,11 @@ class ReportController extends Controller
             ->limit(10)
             ->get();
 
-        $totalRefugees  = Refugee::count();
-        $refugeesWithNeeds = Need::distinct('refugee_id')->count('refugee_id');
+        $totalRefugees        = Refugee::count();
+        $refugeesWithNeeds    = Need::distinct('refugee_id')->count('refugee_id');
         $refugeesWithoutNeeds = $totalRefugees - $refugeesWithNeeds;
 
-        return view('reports.index', compact(
+        return compact(
             'needsByCategory',
             'needsByStatus',
             'topPriorityCases',
@@ -48,6 +48,19 @@ class ReportController extends Controller
             'totalRefugees',
             'refugeesWithNeeds',
             'refugeesWithoutNeeds'
-        ));
+        );
+    }
+
+    public function index()
+    {
+        return view('reports.index', $this->reportData());
+    }
+
+    public function pdf()
+    {
+        $pdf = Pdf::loadView('reports.pdf', $this->reportData())
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('refugee-needs-report-' . now()->format('Y-m-d') . '.pdf');
     }
 }
